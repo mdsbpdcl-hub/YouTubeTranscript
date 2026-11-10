@@ -1,0 +1,5 @@
+# OPTIONAL speech-to-text fallback (heavy: adds ~300-500 MB and needs more memory).
+# To enable on Streamlit Community Cloud, copy these two lines into requirements.txt
+# and set ENABLE_SPEECH_TO_TEXT = "true" in the app's Secrets.
+yt-dlp>=2025.1.1
+faster-whisper>=1.0
