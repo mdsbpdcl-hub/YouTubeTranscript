@@ -1,0 +1,30 @@
+HOW TO RUN THE YOUTUBE TRANSCRIPT EXTRACTOR ON YOUR COMPUTER
+==============================================================
+
+Why: YouTube blocks free cloud servers, but not office or home internet.
+Running the app on your own computer avoids that block.
+
+WINDOWS
+1. Right-click the downloaded ZIP > "Extract All..." > Extract.
+   (Do not run it from inside the ZIP.)
+2. Open the extracted folder and double-click  Start_Windows.bat
+3. If Windows shows "Windows protected your PC", click
+   "More info" > "Run anyway" (the file is plain text; you can open it
+   in Notepad to see exactly what it does).
+4. First time only: Python and the app's components are installed
+   automatically (about 3-5 minutes, needs internet).
+5. Your browser opens the app at http://localhost:8501
+   Keep the black window open while using the app; close it to stop.
+
+Next time: just double-click Start_Windows.bat again (starts in seconds).
+
+MAC
+1. Double-click the ZIP to extract it.
+2. Right-click  Start_Mac.command  > Open > Open
+   (needed the first time because the file is downloaded).
+3. If asked, install Python 3.12 from python.org, then open it again.
+
+PRIVACY
+The app runs on your computer. Only the video links go to YouTube, and
+caption text goes to Google Translate only when translation is needed.
+Nothing is uploaded anywhere else, and nothing is kept after you close it.

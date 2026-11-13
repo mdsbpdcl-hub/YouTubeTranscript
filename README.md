@@ -50,7 +50,11 @@ youtube-transcript-extractor/
 ├── requirements.txt            # Python packages for Streamlit Cloud
 ├── requirements-dev.txt        # + test tools
 ├── requirements-stt.txt        # optional speech-to-text packages (heavy)
-├── packages.txt                # system package (extra Devanagari fonts)
+├── packages.txt                # system package (extra fonts for other scripts)
+├── offline/                    # double-click starters for running on your own computer
+│   ├── Start_Windows.bat
+│   ├── Start_Mac.command
+│   └── HOW_TO_RUN_OFFLINE.txt
 ├── README.md
 ├── .gitignore                  # keeps secrets & user files out of GitHub
 ├── .streamlit/
@@ -62,7 +66,8 @@ youtube-transcript-extractor/
 │   ├── language_processor.py   # Unicode clean-up, script detection, translation
 │   ├── transcript_formatter.py # paragraphs, time stamps, editable text, bilingual pairing
 │   ├── export_manager.py       # TXT / DOCX / PDF / ZIP (in memory)
-│   └── batch_processor.py      # one-by-one processing that never stops on a failure
+│   ├── batch_processor.py      # one-by-one processing that never stops on a failure
+│   └── offline_package.py      # builds the "Run offline" ZIP
 ├── assets/
 │   ├── style.css               # My Application Style
 │   └── fonts/                  # Noto Sans Devanagari (SIL Open Font License) for Hindi PDFs
@@ -187,7 +192,23 @@ with the reason shown. Use it only for audio you are permitted to download and p
 
 ---
 
-## Run on your own computer (optional)
+## Run offline on your own computer (recommended if YouTube blocks the online app)
+
+The online app has a **⬇ Run offline on your computer** button (on step 1, and next to the
+"YouTube is blocking this online server" message). It downloads a small ZIP of the app.
+
+**Windows:** right-click the ZIP → *Extract All* → open the folder → double-click **`Start_Windows.bat`**.
+- If Windows says "Windows protected your PC", click *More info* → *Run anyway*.
+- The first time, Python 3.12 and the app's components are installed automatically (3–5 minutes).
+- Your browser opens the app at `http://localhost:8501`. Keep the black window open; close it to stop.
+- Next time it starts in seconds.
+
+**Mac:** extract the ZIP, right-click **`Start_Mac.command`** → *Open* → *Open*.
+
+Office and home internet connections are not blocked by YouTube the way cloud servers are.
+The header then shows "Running on this computer".
+
+## Run on your own computer — manual way (developers)
 
 Useful if YouTube blocks the cloud server.
 
@@ -216,7 +237,7 @@ TXT/DOCX/PDF/ZIP export with Hindi text, and a full click-through of the app.
 
 | Message | Meaning / fix |
 |---|---|
-| *YouTube is blocking requests from this server* | Cloud IP blocked. Retry later, add a proxy secret, or run locally. |
+| *YouTube is blocking this online server* | Cloud IP blocked. Click **Run offline on your computer**, or add a residential proxy secret. |
 | *Captions are turned off* | The owner disabled captions. Only speech-to-text could help. |
 | *No Hindi captions … translation is switched off* | Set *Translation* to *Automatic* in Advanced options. |
 | *Translation into Hindi failed* | Google Translate rate-limited the server. Retry the failed videos after a minute. |

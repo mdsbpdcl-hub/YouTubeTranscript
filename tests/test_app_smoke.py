@@ -88,3 +88,15 @@ def test_retry_keeps_original_video_numbers(patched):
     results = at.session_state["results"]
     assert results["captionsOff"].index == 0
     assert results["blockedVide"].index == 2
+
+
+def test_blocked_server_offers_offline_download(patched):
+    at = AppTest.from_file(APP, default_timeout=60).run()
+    at.text_area(key="links_raw").input("https://youtu.be/blockedVide").run()
+    at = click(at, "Next")
+    at.slider(key="pause_between_videos").set_value(0.0).run()
+    at = click(at, "Next")
+    at = click(at, "Start processing")
+    assert not at.exception
+    text = " ".join(m.value for m in at.markdown)
+    assert "blocking this online server" in text

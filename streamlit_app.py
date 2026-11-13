@@ -30,6 +30,7 @@ from modules.transcript_extractor import (
     build_proxy_config,
     cleanup_stale_temp,
 )
+from modules.offline_package import build_offline_zip
 from modules.youtube_handler import (
     DEFAULT_MAX_BATCH,
     VideoRef,
@@ -39,6 +40,8 @@ from modules.youtube_handler import (
 )
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
+# Set by Start_Windows.bat / Start_Mac.command when the app runs on the user's own computer.
+OFFLINE = os.environ.get("YTE_OFFLINE") == "1"
 STEPS = ["Add Links", "Settings", "Process", "Download"]
 
 st.set_page_config(
@@ -116,11 +119,35 @@ def render_header() -> None:
         <div class="app-header">
           <div class="app-brand"><div class="app-logo">YT</div>
             <div class="app-name">YouTube Transcript Extractor</div></div>
-          <div class="app-note">Online app · processed on a temporary server · nothing is kept</div>
+          <div class="app-note">{note}</div>
         </div>
-        """,
+        """.replace("{note}", "Running on this computer · nothing is uploaded or kept" if OFFLINE
+                    else "Online app · processed on a temporary server · nothing is kept"),
         unsafe_allow_html=True,
     )
+
+
+@st.cache_data(show_spinner=False)
+def offline_zip() -> bytes:
+    return build_offline_zip()
+
+
+def run_offline_button(key: str, primary: bool = False) -> None:
+    """One-click download of the app with a double-click starter."""
+    if OFFLINE:
+        return
+    st.download_button(
+        "⬇ Run offline on your computer",
+        data=offline_zip(),
+        file_name="YouTube-Transcript-Extractor-offline.zip",
+        mime="application/zip",
+        key=key,
+        type="primary" if primary else "secondary",
+        on_click="ignore",
+    )
+    st.caption("Unzip it and double-click **Start_Windows.bat** (Mac: Start_Mac.command). "
+               "Python is installed automatically the first time. Uses your office/home internet, "
+               "which YouTube does not block.")
 
 
 def render_stepper(current: int) -> None:
@@ -276,6 +303,10 @@ def step_add_links() -> None:
     with st.expander("More ways to add links"):
         uploaded = st.file_uploader("Upload a .txt or .csv file with links", type=["txt", "csv"], key="links_file")
         st.button("Add links from file", on_click=add_links_from_file, disabled=uploaded is None)
+
+    if not OFFLINE:
+        with st.expander("Run offline on your computer (if YouTube blocks the online app)"):
+            run_offline_button("offline_step1")
 
     parsed = parse_links(st.session_state.links_raw, MAX_BATCH)
     if not st.session_state.links_raw.strip():
@@ -489,9 +520,14 @@ def step_process() -> None:
 
     if failed:
         if any(r.error_code == "blocked" for r in failed):
-            note("<b>YouTube is blocking this server.</b> Free cloud servers share internet addresses that YouTube "
-                 "sometimes blocks. Wait and retry, run the app on your own computer, or add a proxy in Secrets "
-                 "(see README).", "bad")
+            if OFFLINE:
+                note("<b>YouTube is limiting requests from this internet connection.</b> Wait 15–30 minutes and "
+                     "retry, or raise <i>Pause between videos</i> in Advanced options.", "bad")
+            else:
+                note("<b>YouTube is blocking this online server.</b> Free cloud servers share internet addresses "
+                     "that YouTube blocks. The quickest fix is to run the app on your own computer — "
+                     "download it below. (An administrator can also add a proxy in Secrets; see README.)", "bad")
+                run_offline_button("offline_blocked", primary=True)
         if retryable and st.button(f"Retry {len(retryable)} failed video(s)"):
             for r in retryable:
                 st.session_state.results.pop(r.video_id, None)
